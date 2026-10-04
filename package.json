@@ -1,0 +1,71 @@
+{
+  "name": "ui-debug-inspector",
+  "version": "0.1.0",
+  "description": "Ctrl+hover any element and see what it calls, what it does, where its data comes from and what payload it sends — framework-neutral (Angular, React or plain DOM).",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./angular": {
+      "types": "./dist/angular/index.d.ts",
+      "default": "./dist/angular/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "default": "./dist/react/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "ui-debug-index-angular": "./bin/ui-debug-index-angular.mjs"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && npm run build:global",
+    "watch": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build:global": "esbuild src/global.ts --bundle --format=iife --target=es2020 --outfile=dist/global.js && esbuild src/global.ts --bundle --format=iife --target=es2020 --minify --outfile=dist/global.min.js",
+    "prepare": "npm run build"
+  },
+  "peerDependencies": {
+    "@angular/common": ">=14",
+    "@angular/core": ">=14",
+    "react": ">=16.8"
+  },
+  "peerDependenciesMeta": {
+    "@angular/common": {
+      "optional": true
+    },
+    "@angular/core": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "typescript": "~5.4.5",
+    "@angular/core": "^17.3.0",
+    "@angular/common": "^17.3.0",
+    "rxjs": "^7.8.0",
+    "esbuild": "^0.24.0"
+  },
+  "keywords": [
+    "debug",
+    "inspector",
+    "overlay",
+    "angular",
+    "react",
+    "devtools"
+  ]
+}

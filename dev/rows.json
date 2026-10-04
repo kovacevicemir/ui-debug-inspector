@@ -1,0 +1,9 @@
+{
+  "totalCount": 3,
+  "page": 1,
+  "users": [
+    { "globalRank": 1, "name": "laffy.", "characterClass": "Popstar", "level": 38, "crewName": "Void Walkers" },
+    { "globalRank": 2, "name": "2MG", "characterClass": "Monster", "level": 38, "crewName": "Razor Pack" },
+    { "globalRank": 3, "name": "kaz", "characterClass": "Gangster", "level": 37, "crewName": "Razor Pack" }
+  ]
+}

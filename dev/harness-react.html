@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ui-debug-inspector — React harness</title>
+    <style>
+      body { font: 14px system-ui, sans-serif; margin: 16px; background: #111827; color: #e5e7eb; }
+      table { border-collapse: collapse; width: 420px; }
+      td, th { border-bottom: 1px solid #374151; padding: 6px 10px; text-align: left; }
+      button { padding: 6px 10px; }
+    </style>
+    <!--
+      Native ESM pages need the bare "react" specifier mapped; Vite/Next/webpack do
+      this for you automatically, which is why the package can keep a plain
+      `import { useEffect } from 'react'`.
+    -->
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@18.3.1",
+          "react-dom/client": "https://esm.sh/react-dom@18.3.1/client"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <h1>React harness</h1>
+    <p>Ctrl+hover a row: props/hook state come from the fiber, and the data chain points at the array prop.</p>
+    <div id="root"></div>
+
+    <script type="module">
+      import React, { useCallback, useEffect, useState } from 'react';
+      import { createRoot } from 'react-dom/client';
+      import { installReactUiDebugInspector } from '../dist/react/index.js';
+
+      const h = React.createElement;
+
+      function PlayerRow({ player, onSelect }) {
+        return h(
+          'tr',
+          { onClick: () => onSelect(player.name) },
+          h('td', null, player.globalRank),
+          h('td', null, h('a', { href: `#/profile/${player.name}` }, player.name)),
+          h('td', null, player.crewName),
+        );
+      }
+
+      function RankingTable({ title }) {
+        const [players, setPlayers] = useState([]);
+        const [status, setStatus] = useState('idle');
+
+        const load = useCallback(async () => {
+          setStatus('loading');
+          const response = await fetch('./rows.json');
+          const json = await response.json();
+          setPlayers(json.users);
+          setStatus('done');
+        }, []);
+
+        useEffect(() => {
+          void load();
+        }, [load]);
+
+        return h(
+          'section',
+          null,
+          h('h2', null, title),
+          h('button', { id: 'reload', onClick: load }, 'Reload rows'),
+          h('span', { style: { marginLeft: 8, opacity: 0.7 } }, `status: ${status}`),
+          h(
+            'table',
+            null,
+            h('thead', null, h('tr', null, h('th', null, '#'), h('th', null, 'Name'), h('th', null, 'Crew'))),
+            h(
+              'tbody',
+              null,
+              players.map((player) => h(PlayerRow, { key: player.name, player, onSelect: (name) => console.log('selected', name) })),
+            ),
+          ),
+        );
+      }
+
+      const handle = installReactUiDebugInspector({ startEnabled: true });
+      createRoot(document.getElementById('root')).render(h(RankingTable, { title: 'Ranking (React)' }));
+      window.uiDebugHarness = { handle };
+    </script>
+  </body>
+</html>

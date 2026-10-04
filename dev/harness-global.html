@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ui-debug-inspector — one-liner (script tag)</title>
+    <style>
+      body { font: 14px system-ui, sans-serif; margin: 16px; background: #111827; color: #e5e7eb; }
+      td, th { border-bottom: 1px solid #374151; padding: 6px 10px; text-align: left; }
+      table { border-collapse: collapse; width: 380px; }
+      button { padding: 6px 10px; }
+    </style>
+  </head>
+  <body>
+    <h1>One-liner harness</h1>
+    <!-- THE ONE LINER: no build step, no framework, just the script tag -->
+    <script src="../dist/global.js" data-auto></script>
+
+    <button id="load">Load rows</button>
+    <table>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <script>
+      const rows = document.getElementById('rows');
+      async function loadRows() {
+        const response = await fetch('./rows.json');
+        const json = await response.json();
+        rows.innerHTML = json.users
+          .map((user) => `<tr><td>${user.globalRank}</td><td><a href="#/profile/${user.name}">${user.name}</a></td><td>${user.crewName}</td></tr>`)
+          .join('');
+      }
+      document.getElementById('load').addEventListener('click', loadRows);
+      loadRows();
+    </script>
+  </body>
+</html>

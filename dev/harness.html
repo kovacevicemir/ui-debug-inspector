@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ui-debug-inspector — plain DOM harness</title>
+    <style>
+      body { font: 14px system-ui, sans-serif; margin: 16px; background: #111827; color: #e5e7eb; }
+      table { border-collapse: collapse; width: 420px; }
+      td, th { border-bottom: 1px solid #374151; padding: 6px 10px; text-align: left; }
+      tr:hover { background: #1f2937; }
+      button { padding: 6px 10px; }
+      a { color: #93c5fd; }
+    </style>
+  </head>
+  <body>
+    <h1>Plain DOM harness</h1>
+    <!-- data-component lets the DOM adapter name the "component" for index lookup -->
+    <p>Ctrl+Shift+D toggles, Ctrl+hover an element (or Ctrl+click) to pin it.</p>
+    <main data-component="HarnessApp">
+      <button id="load">Load ranking</button>
+    <a id="profile" href="#/profile/laffy">laffy.</a>
+    <table>
+      <thead><tr><th>#</th><th>Name</th><th>Crew</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    </main>
+
+    <script type="module">
+      import { installUiDebugInspector } from '../dist/index.js';
+
+      // Same shape the Angular indexer emits — here written by hand for the harness.
+      const index = {
+        routes: [{ path: 'profile/:nickname', component: null, guards: [] }],
+        services: {},
+        components: {
+          HarnessApp: {
+            file: 'dev/harness.html',
+            doc: 'Harness list of ranking players.',
+            selector: 'body',
+            services: {},
+            methods: {
+              loadRanking: {
+                line: 42,
+                doc: 'Loads the ranking table.',
+                endpoints: [{ method: 'GET', path: '/rows.json', body: null, source: 'fetch()' }],
+                calls: [],
+                hubCalls: [],
+                writes: [{ prop: 'rows', kind: 'assign' }],
+                navigates: [],
+                storageOps: [],
+                payloadHint: null,
+              },
+            },
+            fields: [],
+            fills: { rows: [{ method: 'loadRanking', kind: 'assign', line: 42, doc: 'Loads the ranking table.', endpoints: [{ method: 'GET', path: '/rows.json', body: null }], chain: [] }] },
+            fieldOrigins: {},
+            elementHandlers: [
+              { kind: 'event', tag: 'button', event: 'click', expression: 'loadRanking()', handlers: ['loadRanking'], text: 'Load ranking', links: [], queryParams: null, id: 'load', classAttr: null, ariaLabel: null, line: 42, dynamicText: false },
+              { kind: 'link', tag: 'a', event: 'click', expression: "'/profile/' + player.name", handlers: [], text: '', dynamicText: true, links: [{ attr: 'routerLink', expression: "'/profile/' + player.name", preview: '/profile/{player.name}' }], queryParams: null, id: null, classAttr: null, ariaLabel: null, line: 50 },
+            ],
+          },
+        },
+      };
+
+      const handle = installUiDebugInspector({ index, startEnabled: true });
+
+      const rows = document.getElementById('rows');
+      let data = [];
+
+      function render() {
+        rows.innerHTML = data
+          .map(
+            (player) =>
+              `<tr><td>${player.globalRank}</td><td><a href="#/profile/${player.name}">${player.name}</a></td><td>${player.crewName}</td></tr>`,
+          )
+          .join('');
+      }
+
+      async function loadRanking() {
+        const response = await fetch('./rows.json');
+        const json = await response.json();
+        data = json.users;
+        render();
+        return json;
+      }
+
+      document.getElementById('load').addEventListener('click', () => {
+        void loadRanking();
+      });
+
+      // initial population so there are rows to inspect
+      void loadRanking();
+
+      window.uiDebugHarness = { handle, loadRanking, get data() { return data; } };
+    </script>
+  </body>
+</html>
