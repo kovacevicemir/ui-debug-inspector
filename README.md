@@ -281,10 +281,42 @@ The harnesses are plain HTML pages (one React via import map) used to verify the
 
 ## 🗺️ Roadmap
 
-- [ ] `ui-debug-index-react` (JSX AST scan) for pre-click endpoint prediction in React
-- [ ] Vue and Svelte adapters (devtools hooks instead of fibers)
-- [ ] Timeline view of calls per interaction
-- [ ] Export a session (calls + element + chain) as JSON/Markdown for bug reports
+Ordered by how much pain each one removes. Vue/Svelte stay last on purpose — the adapter interface is stable, so they are the cheapest to add once the analysis layer is done.
+
+**Prediction & accuracy**
+
+- [ ] `ui-debug-index-react` (JSX/TSX AST scan) — pre-click endpoint prediction parity with the Angular indexer
+- [ ] Prediction vs reality diff — when you click, mark each predicted endpoint `✓ fired` / `✗ did not fire`, and list every call that was **not** predicted (the interesting bugs)
+- [ ] Page-level call map — "what does this route call on load, and what does each control add on top", generated from the index without touching the UI
+- [ ] Contract drift check — compare predicted body keys (source) → actually sent payload (runtime) → OpenAPI schema, and flag missing/extra/renamed fields
+- [ ] Payload replay from an index prediction (dry-run a handler with mocked services, so you can see the payload without hitting the backend)
+
+**Diagrams & navigation**
+
+- [ ] Interactive dependency graph — draw the chain `element → handler → service → endpoint → state → re-render` as a live SVG/canvas graph, colouring the path that actually ran, and letting you click any node to jump to that element or source line
+- [ ] Sequence / waterfall view per interaction — one click as a timeline: handler start → service call → HTTP (DNS/TTFB/download) → response → state write → DOM update, with the gap between each step
+- [ ] Reverse lookup — pick a recorded call and highlight every element that could have caused it (inverse of the current direction); answers "who is hammering this endpoint?"
+- [ ] Source jump — click any indexed method/binding and open the exact `file:line` in your editor (`vscode://file/…`), with the file path taken from the index
+
+**Runtime health**
+
+- [ ] Duplicate / N+1 detector — same endpoint hit repeatedly inside one interaction or one render pass, with the calling element highlighted
+- [ ] Request leak detector — calls fired after a route change/unmount, or never-cancelled requests; a classic source of ghost updates
+- [ ] State diff per action — snapshot component state before and after a click and show exactly what changed (not just "updates state: x")
+- [ ] Re-render hotspots — render counts per component (Angular CD cycles / React fiber profiling), sorted, so you can see what is re-rendering too much
+
+**Sharing & evidence**
+
+- [ ] Full investigation report export — one `.md` file per investigation containing element identity, the next-steps chain, recorded calls with timings, payloads + inferred TS shapes, payload origins, provenance chain and screenshots: paste straight into a PR/issue
+- [ ] Report builder UI — tick which tabs/sections to include, add a note, copy as Markdown/JSON
+- [ ] HAR import/export + value redaction — redact token/PII fields before sharing a capture, and import a HAR to analyse a session recorded elsewhere
+- [ ] Saved investigations — pin elements, keep a history of inspected targets per session, restore after reload
+- [ ] Session regression capture — record an interaction and diff it against a later run (endpoints, order, payload shape) to catch accidental API changes
+
+**Adapters**
+
+- [ ] Vue 3 adapter — `app._instance` / devtools global hook instead of Angular's `ng` API
+- [ ] Svelte adapter — component context map + `__svelte_meta` for source locations
 
 ---
 
