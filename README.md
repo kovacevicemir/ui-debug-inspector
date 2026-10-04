@@ -7,6 +7,7 @@
 No framework lock-in, no build step, zero runtime dependencies. One script tag, one hook, or one provider.
 
 [![license: MIT](https://img.shields.io/badge/license-MIT-22d3ee.svg?style=flat-square)](LICENSE)
+[![author: kovacevicemir](https://img.shields.io/badge/author-kovacevicemir-0f172a.svg?style=flat-square)](https://github.com/kovacevicemir)
 [![dependencies: none](https://img.shields.io/badge/runtime%20deps-0-4ade80.svg?style=flat-square)](#)
 [![frameworks: Angular · React · vanilla](https://img.shields.io/badge/Angular%20%C2%B7%20React%20%C2%B7%20vanilla-works%20anywhere-8b5cf6.svg?style=flat-square)](#quick-start)
 [![bundle: ~77 kB min](https://img.shields.io/badge/script%20bundle-77%20kB%20min-f59e0b.svg?style=flat-square)](#script-tag-one-liner)
