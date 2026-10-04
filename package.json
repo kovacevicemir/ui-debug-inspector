@@ -27,7 +27,9 @@
   "files": [
     "dist",
     "bin",
-    "README.md"
+    "docs",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json && npm run build:global",

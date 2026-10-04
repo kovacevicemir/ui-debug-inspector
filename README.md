@@ -20,6 +20,16 @@ No framework lock-in, no build step, zero runtime dependencies. One script tag, 
 
 ---
 
+<div align="center">
+
+<img src="docs/showcase-ui-inspector.jpg" alt="UI debug inspector panel pinned over a 3D game page: World3dComponent is identified, the hovered button resolves to setAutoAttack(), and &quot;What happens next&quot; lists the click handler, the service call, GET /get-user-by-username, POST /attack-monster-by-name and the state update, followed by row identity (item 4 of 5, renders World3dComponent.currentMonsters[3]) and the clickables inside" width="900" />
+
+<em>Real capture — <code>Ctrl</code>+hover on a 3D world page: the button resolves to <code>World3dComponent.setAutoAttack()</code>, the full chain down to <code>GET /get-user-by-username</code> and <code>POST /attack-monster-by-name</code>, and the row it lives in is identified as <code>currentMonsters[3]</code>.</em>
+
+</div>
+
+---
+
 ## 🍝 The problem
 
 You are staring at a button and you have no idea:
