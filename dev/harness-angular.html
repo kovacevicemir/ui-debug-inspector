@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ui-debug-inspector — Angular adapter harness</title>
+    <style>
+      body { font: 14px system-ui, sans-serif; margin: 16px; background: #111827; color: #e5e7eb; }
+      table { border-collapse: collapse; width: 420px; }
+      td, th { border-bottom: 1px solid #374151; padding: 6px 10px; text-align: left; }
+      button { padding: 6px 10px; }
+    </style>
+  </head>
+  <body>
+    <h1>Angular adapter harness</h1>
+    <p>
+      Mocks Angular's dev API (<code>window.ng.getComponent/getDirectives</code> + <code>ɵcmp</code> metadata) so the
+      Angular adapter can be verified without an Angular app.
+    </p>
+
+    <app-harness data-ng-host>
+      <button id="reload" class="diablo-btn">Reload</button>
+      <table>
+        <tbody id="rows" data-ng-for></tbody>
+      </table>
+    </app-harness>
+
+    <script type="module">
+      import { installUiDebugInspector } from '../dist/index.js';
+
+      // ── fake Angular component, shaped like a dev-build class ──────────────
+      class HarnessComponent {
+        constructor() {
+          this.players = [
+            { globalRank: 1, name: 'laffy.', crewName: 'Void Walkers' },
+            { globalRank: 2, name: '2MG', crewName: 'Razor Pack' },
+            { globalRank: 3, name: 'kaz', crewName: 'Razor Pack' },
+          ];
+          this.filter = '';
+          this.rankingService = { constructor: { name: 'RankingService' }, cache: this.players };
+          this.loadRanking = () => {};
+        }
+        /** Players currently visible (getter form, like real pages). */
+        get visiblePlayers() {
+          return this.players;
+        }
+      }
+      HarnessComponent.ɵcmp = {
+        selectors: [['app-harness']],
+        inputs: { title: 'title', pageSize: 'pageSize' },
+        outputs: { reloaded: 'reloaded' },
+      };
+      HarnessComponent.prototype.title = 'Ranking (fake Angular)';
+      HarnessComponent.prototype.pageSize = 100;
+
+      const instance = new HarnessComponent();
+
+      // ── fake `window.ng` dev API ──────────────────────────────────────────
+      window.ng = {
+        getComponent: (el) => (el.hasAttribute?.('data-ng-host') ? instance : null),
+        getDirectives: (el) => {
+          if (el.hasAttribute?.('data-ng-for')) {
+            return [{ constructor: { name: 'NgForOf' }, ngForOf: instance.players }];
+          }
+          if (el.id === 'reload') {
+            return [{ constructor: { name: 'UniversalButtonComponent' } }];
+          }
+          return [];
+        },
+      };
+
+      const rows = document.getElementById('rows');
+      rows.innerHTML = instance.players
+        .map(
+          (player) =>
+            `<tr><td>${player.globalRank}</td><td><a href="#/profile/${player.name}">${player.name}</a></td><td>${player.crewName}</td></tr>`,
+        )
+        .join('');
+
+      const index = {
+        routes: [{ path: 'profile/:nickname', component: null, guards: [] }],
+        services: {},
+        components: {
+          HarnessComponent: {
+            file: 'dev/harness-angular.html',
+            doc: 'Fake Angular page listing ranking players.',
+            selector: 'app-harness',
+            services: { rankingService: 'RankingService' },
+            methods: {
+              loadRanking: {
+                line: 12,
+                doc: 'Reloads the ranking list.',
+                endpoints: [{ method: 'GET', path: '/rows.json', body: null, source: 'this.http.get()' }],
+                calls: [],
+                hubCalls: [],
+                writes: [{ prop: 'players', kind: 'assign' }],
+                navigates: [],
+                storageOps: [],
+                payloadHint: null,
+              },
+            },
+            fields: [],
+            fills: { players: [{ method: 'loadRanking', kind: 'assign', line: 12, doc: 'Reloads the ranking list.', endpoints: [{ method: 'GET', path: '/rows.json', body: null }], chain: [] }] },
+            fieldOrigins: {},
+            elementHandlers: [
+              { kind: 'event', tag: 'button', event: 'click', expression: 'loadRanking()', handlers: ['loadRanking'], text: 'Reload', links: [], queryParams: null, id: 'reload', classAttr: 'diablo-btn', ariaLabel: null, line: 12, dynamicText: false },
+              { kind: 'link', tag: 'a', event: 'click', expression: "'/profile/' + player.name", handlers: [], text: '', dynamicText: true, links: [{ attr: 'routerLink', expression: "'/profile/' + player.name", preview: '/profile/{player.name}' }], queryParams: null, id: null, classAttr: null, ariaLabel: null, line: 20 },
+            ],
+          },
+        },
+      };
+
+      const handle = installUiDebugInspector({ index, startEnabled: true });
+      window.uiDebugHarness = { handle, instance };
+    </script>
+  </body>
+</html>

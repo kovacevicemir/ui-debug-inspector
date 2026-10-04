@@ -251,6 +251,7 @@ npm run build          # tsc -> dist (ESM + types) + dist/global.js (IIFE)
 node dev/serve.mjs     # http://localhost:4321/dev/harness.html
                        #  …/dev/harness-global.html   (script-tag one-liner)
                        #  …/dev/harness-react.html    (React fiber adapter)
+                       #  …/dev/harness-angular.html  (Angular adapter, window.ng mocked)
 ```
 
 The harnesses are plain HTML pages (one React via import map) used to verify the panel without an app.

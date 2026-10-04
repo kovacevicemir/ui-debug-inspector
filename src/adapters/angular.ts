@@ -168,21 +168,27 @@ export class AngularAdapter implements InspectAdapter {
     return out.slice(0, 40);
   }
 
-  /** PrimeNG `p-table [value]` and similar inputs pointed at the rendered rows. */
+  /** PrimeNG `p-table [value]`, `*ngFor` (NgForOf.ngForOf) and similar bindings on the rendered rows. */
   boundArray(element: Element): { value: unknown; host: string } | null {
     const api = ng();
     if (!api?.getDirectives) return null;
     const scope = element.closest(
-      'p-table, p-listbox, p-dropdown, p-multiselect, p-treetable, p-orderlist, p-picklist, table',
+      'p-table, p-listbox, p-dropdown, p-multiselect, p-treetable, p-orderlist, p-picklist, table, tbody, ul, ol',
     ) as Element | null;
-    const targets = [scope, element, element.parentElement].filter(Boolean) as Element[];
+    const targets = [scope, element, element.parentElement, element.parentElement?.parentElement].filter(
+      Boolean,
+    ) as Element[];
     for (const candidate of targets) {
       try {
         for (const directive of api.getDirectives?.(candidate) ?? []) {
-          const value = (directive as Record<string, unknown>)['value'];
-          if (Array.isArray(value)) {
-            return { value, host: `${angularClassName(directive as AnyComponent)}.value` };
-          }
+          const record = directive as Record<string, unknown>;
+          const klass = angularClassName(directive as AnyComponent);
+          // p-table / dropdown style
+          const value = record['value'];
+          if (Array.isArray(value)) return { value, host: `${klass}.value` };
+          // *ngFor
+          const ngForOf = record['ngForOf'];
+          if (Array.isArray(ngForOf)) return { value: ngForOf, host: `${klass}.ngForOf` };
         }
       } catch {
         /* ignore */
